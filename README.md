@@ -14,8 +14,7 @@ Upload an image with block diagram and convert it to Microsoft Visio editable Bl
  \
  `read_text.py` - Get a text from block pictures by pytesseract\
  \
- `combine.py`\ - Create the block diagram according to data from picture using Microsoft Visio API
- \
+ `combine.py` - Create the block diagram according to data from picture using Microsoft Visio API
 
 ## Roadmap
 
