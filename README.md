@@ -6,7 +6,7 @@ Upload an image with block diagram and convert it to Microsoft Visio editable Bl
 ## Build with
 1.OpevCV \
 2.PyTesseract (with Tesseract-OCR) \
-3.Python3.7+ \
+3.Python3.7+ 
 
 ## File Preview
 
