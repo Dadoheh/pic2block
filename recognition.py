@@ -1,7 +1,7 @@
 
 import cv2
 from typing import Dict, List, AnyStr
-FILEPATH = "shapes2.png"
+FILEPATH = "shapes/shapes2.png"
 
 
 class Recognition:
@@ -123,10 +123,10 @@ class Recognition:
                 [[313, 310]], [[451, 289]], [[494, 264]], [[168, 169]]],)}}
         """
         if len(approx) == 4:  # input, exercise, if has 4 points
-            self.shapes_dictionary[f'c.x:{self.x}, c.y:{self.y}'] = {"Quadrilateral": approx}  # Quadrilateral
+            self.shapes_dictionary[f'c.x:{self.x}, c.y:{self.y}'] = {"Quadrilateral": approx.tolist()}  # Quadrilateral
 
         elif len(approx) > 10:  # or ellipsoid for Start/Stop - plenty of points
-            self.shapes_dictionary[f'c.x:{self.x}, c.y:{self.y}'] = {"Start/Stop": approx}
+            self.shapes_dictionary[f'c.x:{self.x}, c.y:{self.y}'] = {"Start/Stop": approx.tolist()}
 
         self._recognise_quadrilateral()
 
@@ -142,11 +142,15 @@ class Recognition:
 
         Similarity:
         for (x1,y1), (x2,y2), (x3,y3), (x4,y4)
-            for input: y1=y4, y2=y3
-            for exercise: x1=x4, y1=y2, x2=x3, y3=y4
-            for if: x1=x3, y2=y4
+            for input: y1==y4, y2==y3
+            for exercise: x1==x4, y1==y2, x2==x3, y3==y4
+            for if: x1==x3, y2==y4
         """
-        pass
+        print(self.shapes_dictionary)
+        for key in self.shapes_dictionary.keys():
+            if 'Quadrilateral' in self.shapes_dictionary[key]:
+                coordinates = self.shapes_dictionary[key]['Quadrilateral']
+
 
 
 recognition = Recognition()
