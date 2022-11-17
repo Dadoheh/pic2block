@@ -1,5 +1,5 @@
 import cv2
-from typing import Dict, List, AnyStr
+from typing import Dict, List, AnyStr, Tuple
 
 FILEPATH = "shapes/shapes2.png"
 
@@ -69,13 +69,13 @@ class Recognition:
 
     def find_contours(
         self,
-    ) -> Dict:  # TODO - try to resolve state of public/private method - find_contours
+    ) -> Tuple:
         """Find contours of shape by given threshold."""
         _, threshold = self._convert_to_gray()
         contours, _ = cv2.findContours(
             threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
         )
-
+        r
         i = 0
         for contour in contours:  # list for storing names of shapes
 
@@ -108,7 +108,7 @@ class Recognition:
                 self.y = y
 
             self._recognise_shape(approx)
-        return self.shapes_dictionary
+        return self.x, self.y
 
     @staticmethod
     def _find_center_point_of_shape(shape: cv2) -> (int, int):
