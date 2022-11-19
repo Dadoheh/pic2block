@@ -5,7 +5,6 @@ from pic2block.recognition import Recognition
 
 
 class TestRecognition(unittest.TestCase):
-
     def setUp(self) -> None:
         self.object = Recognition
 

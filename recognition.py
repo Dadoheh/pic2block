@@ -1,7 +1,8 @@
 import cv2
 from typing import Dict, List, AnyStr, Tuple
+from config_log import logger
 
-FILEPATH = "shapes/shapes2.png"
+FILEPATH = "shapes/shapes.png"
 
 
 class Recognition:
@@ -75,7 +76,7 @@ class Recognition:
         contours, _ = cv2.findContours(
             threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
         )
-        r
+
         i = 0
         for contour in contours:  # list for storing names of shapes
 
@@ -91,15 +92,15 @@ class Recognition:
                 True,  # approximate the shape
             )
 
-            print(f"\n\n# approx variable: {approx}\n\n")  # Logger debug in the future
-            print(
+            logger.debug(f"\n\n# approx variable: {approx}\n\n")
+            logger.debug(
                 f"\n\n# len of approx variable: {len(approx)}\n\n"
             )  # Logger debug in the future
 
             cv2.drawContours(self.img, [contour], 0, (255, 0, 0), 5)
 
             M = cv2.moments(contour)
-            print(f"M center value: {M}")  # Logger debug in the future
+            logger.debug(f"M center value: {M}")
 
             x, y = self._find_center_point_of_shape(shape=M)  # TODO - to improve
 
@@ -108,16 +109,18 @@ class Recognition:
                 self.y = y
 
             self._recognise_shape(approx)
-        return self.x, self.y
+        return logger.critical(
+            f"\nself.rectangles {self.rectangles}\nself.diamonds: {self.diamonds}\nself.inputs: {self.inputs}"
+        )
 
     @staticmethod
     def _find_center_point_of_shape(shape: cv2) -> (int, int):
         if shape["m00"] != 0.0:  # finding center point of shape
             x = int(shape["m10"] / shape["m00"])
             y = int(shape["m01"] / shape["m00"])
-            print(f"m00 center value: {shape['m00']}")
-            print(f"m00 center value: {shape['m10']}")
-            print(f"m00 center value: {shape['m01']}")
+            logger.debug(f"m00 center value: {shape['m00']}")
+            logger.debug(f"m00 center value: {shape['m10']}")
+            logger.debug(f"m00 center value: {shape['m01']}")
             return x, y
         else:
             return None, None
@@ -163,48 +166,62 @@ class Recognition:
 
         Similarity:
         for (x1,y1), (x2,y2), (x3,y3), (x4,y4)
-            for input: y1==y4, y2==y3
+            for input: y1==y4, y2==y3,
             for exercise: x1==x2, y2==y3, x3==x4, y1==y4
-            for if: x1==x3, y2==y4
+            for if: x1==x3, y2==y4 # TODO
 
         x and y can be inaccurate between themselves (around 5 pixels)
 
         Insert centre coordinates into appropriate lists: rectangles, diamonds, inputs.
         """
-        print(self.shapes_dictionary)
+        logger.info(f"Shapes_dictionary: {self.shapes_dictionary}")
         for key in self.shapes_dictionary.keys():
             if "Quadrilateral" in self.shapes_dictionary[key]:
                 coordinates = self.shapes_dictionary[key]["Quadrilateral"]
                 coordinates = self.cut_nested_empty_list(coordinates)
-                print(f"Checking similarities on coordinates: {coordinates}")
+                logger.info(
+                    f"Checking similarities on coordinates: {coordinates}"
+                )  # the order matters
                 if (
-                    abs(coordinates[0][0] - coordinates[2][0]) < 5
-                    and abs(coordinates[1][1] - coordinates[3][1]) < 5
-                ):  # matrix 4x2
-                    self.diamonds.append(key)
-                elif (
-                    abs(coordinates[0][1] - coordinates[3][1]) < 5
-                    and abs(coordinates[1][1] - coordinates[2][1]) < 5
-                ):
-                    self.inputs.append(key)
-                elif (
                     abs(coordinates[0][0] - coordinates[1][0]) < 5
                     and abs(coordinates[1][1] - coordinates[2][1]) < 5
                     and abs(coordinates[2][0] - coordinates[3][0]) < 5
                     and abs(coordinates[0][1] == coordinates[3][1]) < 5
                 ):
+                    logger.info(f"Found rectangle at: {key}")
                     self.rectangles.append(key)
+                elif (
+                    abs(coordinates[0][0] - coordinates[2][0]) < 5
+                    and abs(coordinates[1][1] - coordinates[3][1]) < 5
+                ):  # matrix 4x2
+                    logger.info(f"Found diamond at: {key}")
+                    self.diamonds.append(key)  # romb
+                elif (
+                    abs(coordinates[0][1] - coordinates[3][1]) < 5
+                    and abs(coordinates[1][1] - coordinates[2][1]) < 5
+                ) or (
+                    coordinates[0][0]
+                    != coordinates[1][0]
+                    != coordinates[2][0]
+                    != coordinates[3][0]  # TODO Refactor
+                ):
+                    # TODO - delete similar centre records from list self.inputs - to avoid repetitive points.
+                    #  every record which stayed will be recognised correctly as self.input
+                    """
+                    self.rectangles['c.x:338, c.y:251', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251', 'c.x:1975, c.y:359']
+                    self.diamonds: ['c.x:1416, c.y:879', 'c.x:426, c.y:730', 'c.x:1067, c.y:658']
+                    self.inputs: ['c.x:2349, c.y:887', 'c.x:2044, c.y:660', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251',
+                                  'c.x:1975, c.y:359', 'c.x:2350, c.y:887', 'c.x:2044, c.y:659', 'c.x:338, c.y:251']
+                    """
+                    logger.info(f"Found input at: {key}")
+                    self.inputs.append(key)
                 else:
                     # raise AttributeError("Inappropriate quadrilateral input!")
-                    print("No type of quadrilateral found.")
+                    logger.warning("No type of quadrilateral found.")
 
         self.rectangles = list(set(self.rectangles))
         self.diamonds = list(set(self.diamonds))
         self.inputs = list(set(self.inputs))
-
-        print(
-            f"self.rectangles {self.rectangles}\nself.diamonds: {self.diamonds}\nself.inputs: {self.inputs}"
-        )
 
     def _recognise_ellipsoid(self) -> Dict:
         pass
@@ -215,10 +232,10 @@ class Recognition:
         improved_list = []
         for element in nested_list:
             improved_list.append(element[0])
-        print(f"improved_list: {improved_list}")
+        logger.info(f"improved_list: {improved_list}")
         return improved_list
 
 
 recognition = Recognition()
 recognition.read_image()
-print(f"\n{recognition.find_contours()}")
+recognition.find_contours()
