@@ -8,9 +8,7 @@ FILEPATH = r"C:\pic2block-main\shapes\shapes_resized.png"
 
 
 class AbstractRecognition(ABC):
-    """
-    Recognition Class - complete process.
-    """
+    """Recognition Class - complete process."""
 
     def __init__(self):
         """Construct the beginning attributes for recognising shapes.
