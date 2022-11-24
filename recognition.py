@@ -3,7 +3,7 @@ import re
 from typing import Dict, List, AnyStr, Tuple
 from config_log import logger
 
-FILEPATH = "shapes/shapes.png"
+FILEPATH = "C:\derma-tester\shapes\shapes_resized.png"
 
 
 class Recognition:

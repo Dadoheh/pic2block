@@ -1,6 +1,6 @@
 import argparse
 import logging
-from config_log import c_format, c_handler, logger
+from config_log import logger
 from recognition import Recognition
 
 parser = argparse.ArgumentParser()
@@ -25,11 +25,17 @@ parser.add_argument(
     help="Only Critical and Errors",
     action="store_const", dest="loglevel", const=logging.CRITICAL,
 )
+
 args = parser.parse_args()
 logging.basicConfig(level=args.loglevel)
+c_handler = logging.StreamHandler()
+c_format = logging.Formatter(
+    "%(asctime)s - line: %(lineno)d - %(levelname)s - %(message)s"
+)
 
 c_handler.setFormatter(c_format)
-logger.addHandler(c_handler)
+# logger.addHandler(c_handler)  # TODO - check the proper setting logging with argparse
+
 
 def main():
     recognition = Recognition()
@@ -38,3 +44,4 @@ def main():
 
 
 main()
+
