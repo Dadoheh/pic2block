@@ -1,12 +1,10 @@
 import cv2
-import re
 from typing import Dict, List, AnyStr, Tuple
 from config_log import logger
+from base import AbstractRecognition, FILEPATH
 
-FILEPATH = "C:\derma-tester\shapes\shapes_resized.png"
 
-
-class Recognition:
+class Recognition(AbstractRecognition):
     """Recognise and represent the shape of block.
 
     Attributes
@@ -62,13 +60,6 @@ class Recognition:
         self.img = cv2.imread(path_to_picture_file)
         return self.img
 
-    def _convert_to_gray(self) -> cv2:
-        """Convert image into grayscale image and set a threshold."""
-        gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
-        _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
-
-        return gray, threshold
-
     def find_contours(
         self,
     ) -> Tuple:
@@ -109,53 +100,12 @@ class Recognition:
                 self.x = x
                 self.y = y
 
-            self._recognise_shape(approx)
+            self.recognise_shape(approx)
         return logger.critical(
             f"\nself.rectangles {self.rectangles}\nself.diamonds: {self.diamonds}\nself.inputs: {self.inputs}"
         )
 
-    @staticmethod
-    def _find_center_point_of_shape(shape: cv2) -> (int, int):
-        if shape["m00"] != 0.0:  # finding center point of shape
-            x = int(shape["m10"] / shape["m00"])
-            y = int(shape["m01"] / shape["m00"])
-            logger.debug(f"m00 center value: {shape['m00']}")
-            logger.debug(f"m00 center value: {shape['m10']}")
-            logger.debug(f"m00 center value: {shape['m01']}")
-            return x, y
-        else:
-            return None, None
-
-    def _recognise_shape(self, approx: List) -> None:
-        """
-        Make a decision if a shape is quadrilateral or ellipsoid. Create a proper self.shapes_dictionary.
-
-        Structure of the dictionary:
-
-        {"centre x coordinate, centre y coordinate":{"Type of shape": array(list of points)}}
-
-        e.g.:
-        {'c.x:477, c.y:499':
-            {'Quadrilateral': array([[[477, 384]], [[349, 499]], [[477, 614]],
-                [[605, 499]]])},
-        'c.x:332, c.y:215':
-            {'Start/Stop': array([[[144, 210]], [[153, 245]], [[187, 276]],
-                [[313, 310]], [[451, 289]], [[494, 264]], [[168, 169]]],)}}
-        """
-        if len(approx) == 4:  # input, exercise, if has 4 points
-            self.shapes_dictionary[f"c.x:{self.x}, c.y:{self.y}"] = {
-                "Quadrilateral": approx.tolist()
-            }  # Quadrilateral
-
-        elif len(approx) > 10:  # or ellipsoid for Start/Stop - plenty of points
-            self.shapes_dictionary[f"c.x:{self.x}, c.y:{self.y}"] = {
-                "Start/Stop": approx.tolist()
-            }
-
-        quadrilateral_types_dictionary = self._recognise_quadrilateral()
-        ellipsoid_dictionary = self._recognise_ellipsoid()
-
-    def _recognise_quadrilateral(self) -> None:
+    def recognise_quadrilateral(self) -> None:
         """
         Recognise between 4 accessible quadrilaterals.
         - input statement
@@ -169,7 +119,7 @@ class Recognition:
         for (x1,y1), (x2,y2), (x3,y3), (x4,y4)
             for input: y1==y4, y2==y3,
             for exercise: x1==x2, y2==y3, x3==x4, y1==y4
-            for if: x1==x3, y2==y4 # TODO
+            for if: x1==x3, y2==y4 # TODO Check if better similarities exist
 
         x and y can be inaccurate between themselves (around 5 pixels)
 
@@ -217,57 +167,38 @@ class Recognition:
         self.inputs = list(set(self.inputs))
         self._clear_up_similar_inputs_from_rectangles_and_diamonds()
 
-    def _clear_up_similar_inputs_from_rectangles_and_diamonds(self) -> None:
+    def recognise_shape(self, approx: List) -> None:
         """
-        Delete similar centre records from list self.inputs - to avoid repetitive points.
-        every record which stayed will be recognised correctly as self.input
-            example data structures:
-                    self.rectangles['c.x:338, c.y:251', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251', 'c.x:1975, c.y:359']
-                    self.diamonds: ['c.x:1416, c.y:879', 'c.x:426, c.y:730', 'c.x:1067, c.y:658']
-                    self.inputs: ['c.x:2349, c.y:887', 'c.x:2044, c.y:660', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251',
-                                  'c.x:1975, c.y:359', 'c.x:2350, c.y:887', 'c.x:2044, c.y:659', 'c.x:338, c.y:251']
+        Make a decision if a shape is quadrilateral or ellipsoid. Create a proper self.shapes_dictionary.
+
+        Structure of the dictionary:
+
+        {"centre x coordinate, centre y coordinate":{"Type of shape": array(list of points)}}
+
+        e.g.:
+        {'c.x:477, c.y:499':
+            {'Quadrilateral': array([[[477, 384]], [[349, 499]], [[477, 614]],
+                [[605, 499]]])},
+        'c.x:332, c.y:215':
+            {'Start/Stop': array([[[144, 210]], [[153, 245]], [[187, 276]],
+                [[313, 310]], [[451, 289]], [[494, 264]], [[168, 169]]],)}}
+
+        :param approx: List of approximated centres
         """
-        for element in list(self.inputs):
-            if element in self.rectangles or element in self.diamonds:
-                self.inputs.remove(element)
-        self._clear_up_similar_inputs_from_inputs()
-        logger.info(f"Cleared list of inputs: {self.inputs}")
-        self._clear_up_similar_inputs_from_inputs()
+        if len(approx) == 4:  # input, exercise, if has 4 points
+            self.shapes_dictionary[f"c.x:{self.x}, c.y:{self.y}"] = {
+                "Quadrilateral": approx.tolist()
+            }  # Quadrilateral
 
-    def _clear_up_similar_inputs_from_inputs(self) -> None:
-        list_of_repetitive_items = []
-        for element in self.inputs:
-            x_cord = int((re.search("c\.x:([0-9]*)", element).group(1)))
-            logger.debug(f"x_cord: {x_cord}")
+        elif len(approx) > 10:  # or ellipsoid for Start/Stop - plenty of points
+            self.shapes_dictionary[f"c.x:{self.x}, c.y:{self.y}"] = {
+                "Start/Stop": approx.tolist()
+            }
 
-            # TODO - TO REFACTOR - check if element in self.inputs[self.inputs.index(element)+1::]
-            if not abs((self.inputs.index(element)) - len(self.inputs)) < 0:
-                for sub_element in range(
-                    self.inputs.index(element) + 1, len(self.inputs)
-                ):
-                    x_sub_cord = int(
-                        (re.search("c\.x:([0-9]*)", self.inputs[sub_element])).group(1)
-                    )
-                    if abs(x_cord - x_sub_cord) < 5:
-                        logger.debug(f"x_sub_cord: {x_sub_cord}")
-                        list_of_repetitive_items.append(
-                            self.inputs[sub_element]
-                        )  # pes. x^2 complexity - to refactor
+        self.recognise_ellipsoid()
+        self.recognise_quadrilateral()
 
-        logger.critical(list_of_repetitive_items)
-
-        for element in list_of_repetitive_items:
-            self.inputs.remove(element)
-
-    def _recognise_ellipsoid(self) -> Dict:
+    def recognise_ellipsoid(self) -> Dict:
         pass
-
-    @staticmethod
-    def cut_nested_empty_list(nested_list: List) -> List:
-        """Cut unimportant nesting"""
-        improved_list = []
-        for element in nested_list:
-            improved_list.append(element[0])
-        logger.error(f"improved_list: {improved_list}")
-        return improved_list
-
+        # TODO https://github.com/Dadoheh/pic2block/issues/17
+        logger.debug("To be done")
