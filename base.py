@@ -10,13 +10,6 @@ FILEPATH = r"C:\pic2block-main\shapes\shapes_resized.png"
 class AbstractRecognition(ABC):
     """
     Recognition Class - complete process.
-
-    Usage example:
-    >>>
-    >>>
-    NotImplementedError is raised with message "This type of Connection doesn't support stdout!"
-    >>>
-
     """
 
     def __init__(self):
