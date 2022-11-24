@@ -1,8 +1,9 @@
 import cv2
+import re
 from typing import Dict, List, AnyStr, Tuple
 from config_log import logger
 
-FILEPATH = "shapes/shapes.png"
+FILEPATH = "C:\derma-tester\shapes\shapes_resized.png"
 
 
 class Recognition:
@@ -154,7 +155,7 @@ class Recognition:
         quadrilateral_types_dictionary = self._recognise_quadrilateral()
         ellipsoid_dictionary = self._recognise_ellipsoid()
 
-    def _recognise_quadrilateral(self) -> Dict:
+    def _recognise_quadrilateral(self) -> None:
         """
         Recognise between 4 accessible quadrilaterals.
         - input statement
@@ -205,14 +206,6 @@ class Recognition:
                     != coordinates[2][0]
                     != coordinates[3][0]  # TODO Refactor
                 ):
-                    # TODO - delete similar centre records from list self.inputs - to avoid repetitive points.
-                    #  every record which stayed will be recognised correctly as self.input
-                    """
-                    self.rectangles['c.x:338, c.y:251', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251', 'c.x:1975, c.y:359']
-                    self.diamonds: ['c.x:1416, c.y:879', 'c.x:426, c.y:730', 'c.x:1067, c.y:658']
-                    self.inputs: ['c.x:2349, c.y:887', 'c.x:2044, c.y:660', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251',
-                                  'c.x:1975, c.y:359', 'c.x:2350, c.y:887', 'c.x:2044, c.y:659', 'c.x:338, c.y:251']
-                    """
                     logger.info(f"Found input at: {key}")
                     self.inputs.append(key)
                 else:
@@ -222,6 +215,49 @@ class Recognition:
         self.rectangles = list(set(self.rectangles))
         self.diamonds = list(set(self.diamonds))
         self.inputs = list(set(self.inputs))
+        self._clear_up_similar_inputs_from_rectangles_and_diamonds()
+
+    def _clear_up_similar_inputs_from_rectangles_and_diamonds(self) -> None:
+        """
+        Delete similar centre records from list self.inputs - to avoid repetitive points.
+        every record which stayed will be recognised correctly as self.input
+            example data structures:
+                    self.rectangles['c.x:338, c.y:251', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251', 'c.x:1975, c.y:359']
+                    self.diamonds: ['c.x:1416, c.y:879', 'c.x:426, c.y:730', 'c.x:1067, c.y:658']
+                    self.inputs: ['c.x:2349, c.y:887', 'c.x:2044, c.y:660', 'c.x:1647, c.y:160', 'c.x:1025, c.y:251',
+                                  'c.x:1975, c.y:359', 'c.x:2350, c.y:887', 'c.x:2044, c.y:659', 'c.x:338, c.y:251']
+        """
+        for element in list(self.inputs):
+            if element in self.rectangles or element in self.diamonds:
+                self.inputs.remove(element)
+        self._clear_up_similar_inputs_from_inputs()
+        logger.info(f"Cleared list of inputs: {self.inputs}")
+        self._clear_up_similar_inputs_from_inputs()
+
+    def _clear_up_similar_inputs_from_inputs(self) -> None:
+        list_of_repetitive_items = []
+        for element in self.inputs:
+            x_cord = int((re.search("c\.x:([0-9]*)", element).group(1)))
+            logger.debug(f"x_cord: {x_cord}")
+
+            # TODO - TO REFACTOR - check if element in self.inputs[self.inputs.index(element)+1::]
+            if not abs((self.inputs.index(element)) - len(self.inputs)) < 0:
+                for sub_element in range(
+                    self.inputs.index(element) + 1, len(self.inputs)
+                ):
+                    x_sub_cord = int(
+                        (re.search("c\.x:([0-9]*)", self.inputs[sub_element])).group(1)
+                    )
+                    if abs(x_cord - x_sub_cord) < 5:
+                        logger.debug(f"x_sub_cord: {x_sub_cord}")
+                        list_of_repetitive_items.append(
+                            self.inputs[sub_element]
+                        )  # pes. x^2 complexity - to refactor
+
+        logger.critical(list_of_repetitive_items)
+
+        for element in list_of_repetitive_items:
+            self.inputs.remove(element)
 
     def _recognise_ellipsoid(self) -> Dict:
         pass
@@ -232,10 +268,6 @@ class Recognition:
         improved_list = []
         for element in nested_list:
             improved_list.append(element[0])
-        logger.info(f"improved_list: {improved_list}")
+        logger.error(f"improved_list: {improved_list}")
         return improved_list
 
-
-recognition = Recognition()
-recognition.read_image()
-recognition.find_contours()
