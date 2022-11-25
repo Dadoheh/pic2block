@@ -1,7 +1,12 @@
 import cv2
 from typing import Dict, List, AnyStr, Tuple
-from config_log import logger
-from base import AbstractRecognition, RESIZED_SHAPES_PNG
+
+import numpy
+
+
+from pic2block.config_log import logger
+
+from pic2block.base import AbstractRecognition, RESIZED_SHAPES_PNG
 
 
 class Recognition(AbstractRecognition):
@@ -167,9 +172,12 @@ class Recognition(AbstractRecognition):
         self.inputs = list(set(self.inputs))
         self._clear_up_similar_inputs_from_rectangles_and_diamonds()
 
-    def recognise_shape(self, approx: List) -> None:
+    def recognise_shape(self, approx: numpy.ndarray) -> Dict:
         """
         Make a decision if a shape is quadrilateral or ellipsoid. Create a proper self.shapes_dictionary.
+
+        :param approx: List of approximated centres
+        :return: Dictionaries with quadrilateral and ellipsoid shapes.
 
         Structure of the dictionary:
 
@@ -182,8 +190,6 @@ class Recognition(AbstractRecognition):
         'c.x:332, c.y:215':
             {'Start/Stop': array([[[144, 210]], [[153, 245]], [[187, 276]],
                 [[313, 310]], [[451, 289]], [[494, 264]], [[168, 169]]],)}}
-
-        :param approx: List of approximated centres
         """
         if len(approx) == 4:  # input, exercise, if has 4 points
             self.shapes_dictionary[f"c.x:{self.x}, c.y:{self.y}"] = {
@@ -197,6 +203,8 @@ class Recognition(AbstractRecognition):
 
         self.recognise_ellipsoid()
         self.recognise_quadrilateral()
+        return self.shapes_dictionary
+
 
     def recognise_ellipsoid(self) -> Dict:
         pass
