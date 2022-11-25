@@ -23,7 +23,7 @@ As I'm combinig an internship work (35h/week) with extramural studies, the updat
 
 - [x] **Investigation** 
 - [x] **recognition.py**
+- [x] **Abstraction**
 - [ ] **read_text.py** :point_left: *currently working on this*
 - [ ] **combine.py** 
 - [ ] **GUI**  
-- [ ] **Finish**
