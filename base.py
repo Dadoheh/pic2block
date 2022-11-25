@@ -1,10 +1,9 @@
-from abc import ABC, abstractmethod
+import re
 import cv2
+from abc import ABC, abstractmethod
 from typing import Dict, List, AnyStr, Tuple
 from config_log import logger
-import re
-
-FILEPATH = r"C:\pic2block-main\shapes\shapes_resized.png"
+from definitions import RESIZED_SHAPES_PNG
 
 
 class AbstractRecognition(ABC):
@@ -29,7 +28,7 @@ class AbstractRecognition(ABC):
         self.inputs: List = []
 
     @abstractmethod
-    def read_image(self, path_to_picture_file: AnyStr = FILEPATH) -> cv2:
+    def read_image(self, path_to_picture_file: AnyStr = RESIZED_SHAPES_PNG) -> cv2:
         """
         Read an image from file.
         Ask a user if none path was given.

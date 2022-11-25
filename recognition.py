@@ -1,7 +1,7 @@
 import cv2
 from typing import Dict, List, AnyStr, Tuple
 from config_log import logger
-from base import AbstractRecognition, FILEPATH
+from base import AbstractRecognition, RESIZED_SHAPES_PNG
 
 
 class Recognition(AbstractRecognition):
@@ -49,7 +49,7 @@ class Recognition(AbstractRecognition):
         self.diamonds: List = []
         self.inputs: List = []
 
-    def read_image(self, path_to_picture_file: AnyStr = FILEPATH) -> cv2:
+    def read_image(self, path_to_picture_file: AnyStr = RESIZED_SHAPES_PNG) -> cv2:
         """Read an image from file.
         Ask a user if none path was given.
         """
