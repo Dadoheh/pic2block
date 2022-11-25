@@ -1,7 +1,7 @@
 import re
 import cv2
-from config_log import logger
-from recognition import FILEPATH
+from pic2block.config_log import logger
+from pic2block.definitions import RESIZED_SHAPES_PNG
 from typing import List, Tuple, AnyStr
 
 
@@ -17,7 +17,7 @@ class ImageCoordinates:
 
     def __init__(
         self,
-        imagepath=FILEPATH,
+        imagepath=RESIZED_SHAPES_PNG,
         default_quadrilateral_sequence=("rectangles", "diamonds", "inputs"),
     ):
         """Create output centre_coordinates list.
@@ -28,7 +28,7 @@ class ImageCoordinates:
         self.default_quadrilateral_sequence = default_quadrilateral_sequence
 
     def check_centre_points(self, list_with_string_coordinates: List) -> None:
-        """Start calling private methods for drawing points in picture FILEPATH.
+        """Start calling private methods for drawing points in picture SHAPES_DIR.
         :param list_with_string_coordinates: a list with parsed coordinates by recognition.py
         """
         if list_with_string_coordinates:
@@ -56,7 +56,7 @@ class ImageCoordinates:
         return self.centre_coordinates
 
     def _draw_coordinates_on_picture(self):
-        """Draw coordinates on the picture from FILEPATH. Type x,y coordinates and type of quadrilateral."""
+        """Draw coordinates on the picture from SHAPES_DIR. Type x,y coordinates and type of quadrilateral."""
         logger.debug(f"Parsed quadrilateral: {self.centre_coordinates}")
         image = cv2.imread(self.imagepath)
 
