@@ -18,6 +18,8 @@ As I'm combinig an internship work (35h/week) with extramural studies, the updat
  `read_text.py` - Get a text from block pictures by pytesseract\
  \
  `combine.py` - Create the block diagram according to data from picture using Microsoft Visio API
+ \
+ `base.py` - Abstraction for recognition, read_text and combine
 
 ## Roadmap
 
