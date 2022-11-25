@@ -2,8 +2,8 @@ import re
 import cv2
 from abc import ABC, abstractmethod
 from typing import Dict, List, AnyStr, Tuple
-from config_log import logger
-from definitions import RESIZED_SHAPES_PNG
+from pic2block.config_log import logger
+from pic2block.definitions import RESIZED_SHAPES_PNG
 
 
 class AbstractRecognition(ABC):
@@ -73,7 +73,7 @@ class AbstractRecognition(ABC):
             return None, None
 
     @abstractmethod
-    def recognise_shape(self, approx: List) -> None:
+    def recognise_shape(self, approx: List) -> Dict:
         """
         Make a decision if a shape is quadrilateral or ellipsoid. Create a proper self.shapes_dictionary.
 
@@ -90,6 +90,7 @@ class AbstractRecognition(ABC):
                 [[313, 310]], [[451, 289]], [[494, 264]], [[168, 169]]],)}}
 
         :param approx: List of approximated centres
+        :return: Dictionaries with quadrilateral and ellipsoid shapes.
         """
         pass
 
