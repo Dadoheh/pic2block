@@ -1,7 +1,6 @@
 import argparse
 import logging
-import os
-from config_log import logger
+from tests.functional_test_recognition import ImageCoordinates
 from recognition import Recognition
 
 
@@ -39,11 +38,32 @@ c_handler.setFormatter(c_format)
 # logger.addHandler(c_handler)  # TODO - check the proper setting logging with argparse
 
 
-def main():
+def functional_recognition(rectangles, diamonds, inputs):
+    check_coordinates = ImageCoordinates()
+    string_coordinates = {"rectangles": rectangles, "diamonds": diamonds, "inputs": inputs}
+
+    check_coordinates.check_centre_points(string_coordinates=string_coordinates)
+
+
+def main(run_with_functional_test: bool):
     recognition = Recognition()
     recognition.read_image()
-    recognition.find_contours()
+    rectangles, diamonds, inputs = recognition.find_contours()
 
 
-main()
+    functional_recognition(rectangles, diamonds, inputs)
 
+
+
+main(run_with_functional_test=True)
+
+
+"""
+
+    testing_list = [
+        ["c.x:99, c.y:73", "c.x:580, c.y:105", "c.x:484, c.y:47", "c.x:301, c.y:73"],
+        ["c.x:124, c.y:213", "c.x:415, c.y:257", "c.x:313, c.y:193"],
+        ["c.x:690, c.y:259", "c.x:483, c.y:46", "c.x:600, c.y:193"],
+    ]  # testing set
+
+"""

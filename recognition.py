@@ -54,6 +54,9 @@ class Recognition(AbstractRecognition):
         self.diamonds: List = []
         self.inputs: List = []
 
+    def __getitem__(self, item):
+        return getattr(self, item)
+
     def read_image(self, path_to_picture_file: AnyStr = RESIZED_SHAPES_PNG) -> cv2:
         """Read an image from file.
         Ask a user if none path was given.
@@ -67,7 +70,7 @@ class Recognition(AbstractRecognition):
 
     def find_contours(
         self,
-    ) -> Tuple:
+    ) -> Tuple[list, list, list]:
         """Find contours of shape by given threshold."""
         _, threshold = self._convert_to_gray()
         contours, _ = cv2.findContours(
@@ -106,9 +109,10 @@ class Recognition(AbstractRecognition):
                 self.y = y
 
             self.recognise_shape(approx)
-        return logger.critical(
+            logger.critical(
             f"\nself.rectangles {self.rectangles}\nself.diamonds: {self.diamonds}\nself.inputs: {self.inputs}"
-        )
+            )
+        return self.rectangles, self.diamonds, self.inputs
 
     def recognise_quadrilateral(self) -> None:
         """
