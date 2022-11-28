@@ -6,7 +6,16 @@ from pic2block.config_log import logger
 from pic2block.definitions import RESIZED_SHAPES_PNG
 
 
-class AbstractRecognition(ABC):
+class AbstractShapes(ABC):
+    """Pre-abstract Class - share list shapes with Recognition and ImageCoordinates"""
+    def __init__(self):
+        """Prepare main shape Lists globally."""
+        self.rectangles: List = []
+        self.diamonds: List = []
+        self.inputs: List = []
+
+
+class AbstractRecognition(AbstractShapes, ABC):
     """Recognition Class - complete process."""
 
     def __init__(self):
@@ -19,13 +28,11 @@ class AbstractRecognition(ABC):
         :param y : int y-coordinate from center of the shape.
 
         """
+        super().__init__()
         self.img: cv2 = None
         self.x: int = 0
         self.y: int = 0
         self.shapes_dictionary: Dict = {}
-        self.rectangles: List = []
-        self.diamonds: List = []
-        self.inputs: List = []
 
     @abstractmethod
     def read_image(self, path_to_picture_file: AnyStr = RESIZED_SHAPES_PNG) -> cv2:
@@ -49,10 +56,10 @@ class AbstractRecognition(ABC):
         return gray, threshold
 
     @abstractmethod
-    def find_contours(self) -> Tuple:
+    def find_contours(self) -> Tuple[List, List, List]:
         """
         Find contours of shape by given threshold.
-        :return: Tuple with contours
+        :return: Tuple with contours: self.rectangles, self.diamonds, self.inputs
         """
         pass
 
