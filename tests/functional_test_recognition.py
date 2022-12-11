@@ -1,7 +1,8 @@
 import re
 import cv2
-from pic2block.config_log import logger
 from pic2block.definitions import RESIZED_SHAPES_PNG
+from pic2block.config_log import logger
+
 from typing import List, Tuple, AnyStr
 
 
