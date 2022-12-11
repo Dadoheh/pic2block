@@ -1,12 +1,10 @@
 import cv2
 from typing import Dict, List, AnyStr, Tuple
-
 import numpy
+from config_log import logger
 
-
-from pic2block.config_log import logger
-
-from pic2block.base import AbstractRecognition, RESIZED_SHAPES_PNG
+from base import AbstractRecognition
+from definitions import RESIZED_SHAPES_PNG
 
 
 class Recognition(AbstractRecognition):
