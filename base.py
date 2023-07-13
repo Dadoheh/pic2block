@@ -2,8 +2,8 @@ import re
 import cv2
 from abc import ABC, abstractmethod
 from typing import Dict, List, AnyStr, Tuple
-from config_log import logger
-from definitions import RESIZED_SHAPES_PNG
+from pic2block.config_log import logger
+from pic2block.definitions import RESIZED_SHAPES_PNG
 
 
 class AbstractRecognition(ABC):

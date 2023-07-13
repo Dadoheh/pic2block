@@ -1,10 +1,10 @@
 import cv2
 from typing import Dict, List, AnyStr, Tuple
 import numpy
-from config_log import logger
+from pic2block.config_log import logger
 
-from base import AbstractRecognition
-from definitions import RESIZED_SHAPES_PNG
+from pic2block.base import AbstractRecognition
+from pic2block.definitions import RESIZED_SHAPES_PNG
 
 
 class Recognition(AbstractRecognition):
@@ -189,6 +189,9 @@ class Recognition(AbstractRecognition):
             {'Start/Stop': array([[[144, 210]], [[153, 245]], [[187, 276]],
                 [[313, 310]], [[451, 289]], [[494, 264]], [[168, 169]]],)}}
         """
+        if len(approx) == 1:  # empty list
+            raise ValueError("No approx points!")  # custom error in the future
+
         if len(approx) == 4:  # input, exercise, if has 4 points
             self.shapes_dictionary[f"c.x:{self.x}, c.y:{self.y}"] = {
                 "Quadrilateral": approx.tolist()
