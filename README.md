@@ -3,8 +3,6 @@
 ## About Project
 Upload an image with block diagram and convert it to Microsoft Visio editable Block Diagram!
 
-## Disclaimer
-As I'm combinig an internship work (35h/week) with extramural studies, the updates of this public project may appear over a long period of time. But I love spending every free hour on investigating and implementing as clean code as possible! <3
 
 ## Build with
 1.OpevCV\
